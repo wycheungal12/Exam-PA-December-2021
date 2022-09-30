@@ -1,0 +1,325 @@
+---
+title: "December 13 2021 Exam PA Rmd file"
+---
+
+Starter Code
+
+```{r}
+# This code chunk should be run without any changes.
+
+# The data.all.original dataframe will be a common starting point for many tasks.
+
+# The following line indicates the form of variable for each of the 15 columns in the provided dataset.
+# The first column is a factor, the second is numeric.
+# The third and fourth columns are factors, the fifth is numeric, and the
+# last 10 columns are factors.
+c15 <-c("factor", "numeric", rep(c("factor"), 2), "numeric", rep(c("factor"), 10))
+
+# Read in the data from the provided dataset.
+data.all.original <- read.csv("Exam PA Animal Shelter Data.csv", colClasses = c15)
+
+# The following relevels month variables to match calendar order.
+data.all.original$in.month <- 
+  as.factor(as.numeric(as.character(data.all.original$in.month)))
+data.all.original$out.month <- 
+  as.factor(as.numeric(as.character(data.all.original$out.month)))
+
+# Load packages for all tasks.
+library(tidyverse) # includes ggplot2, dplyr
+library(rpart)
+library(pROC)
+library(glmnet)
+library(caret)
+```
+
+Task 1
+
+```{r}
+# No code.
+```
+
+Task 2
+
+```{r}
+# All the code in this chunk is to be run unchanged.
+# Candidates are not expected to add or change code.
+
+# Set the data so that all candidates start with the same dataframe.
+data.all.task2 <- data.all.original
+
+# Plot factor variables except for name, breed, and color vs stay.
+
+# Select all the factor variables except for name, breed, and color.
+fs <- data.all.task2[-c(13:15)] %>%  keep(is.factor)
+
+# Plot all the factor variables except in.year against stay,
+# using the same limits on the y axis.
+for (i in colnames(fs)[-5 ]) {
+  print(ggplot(data.all.task2, aes_string(x = i, y = "stay")) + 
+          geom_boxplot(outlier.shape = NA) + ylim(0, 75))
+}
+
+# Plot in.year against stay, using an appropriate limit on the y axis.
+ggplot(data.all.task2, aes_string(x = "in.year", y = "stay")) + 
+  geom_boxplot(outlier.shape = NA) + ylim(0, 750)
+
+# Now plot a numeric variable, age, against stay.
+ggplot(data.all.task2, aes(x = age, y = stay)) + geom_point()
+
+# Remove the dataframe since it will not be used again.
+rm(data.all.task2)
+
+```
+
+Task 3
+
+```{r}
+# All the provided code in this chunk is to be run unchanged.
+# Candidates will add their own code at bottom as indicated.
+
+# Set the data so that all candidates start with the same dataframe.
+data.all.task3 <- data.all.original
+
+# Create new variable, name.weight.  
+#
+# The code below uses base R functions to look for patterns in the names 
+# that indicate that the name variable was used to hold weight information.
+# The weight information is extracted.
+data.all.task3$name2 <- gsub("Grams|grams|[0-9] G|[0-9]G", "Weight", data.all.task3$name)
+data.all.task3$weight <- as.numeric(str_detect(data.all.task3$name2, "Weight"))
+data.all.task3$name.weight <- data.all.task3$name
+data.all.task3$name.weight <- gsub("[^[:digit:].,]", "", data.all.task3$name)
+data.all.task3$name.weight[data.all.task3$weight == 0] <- NA
+data.all.task3$name.weight <- as.numeric(data.all.task3$name.weight)
+
+# Drop unnecessary variables
+drop <- c("weight", "name2")
+data.all.task3 <- data.all.task3[, setdiff(colnames(data.all.task3), drop)]
+
+# ------------- Candidate code -------------------------
+# Perform bivariate analysis of the new variable, name.weight
+# Use the space below for code you write.
+
+
+
+
+
+
+# Once task is done, uncomment the line below to delete the task data.
+#rm(data.all.task3)
+
+```
+
+Task 4
+
+```{r}
+# All the provided code in this chunk is to be run unchanged.
+# Candidates will add their own code at bottom as indicated.
+
+# Set the data so that all candidates start with the same dataframe.
+data.all.task4 <- data.all.original
+
+# The assistant's code that creates the mix variable 
+data.all.task4$mix <- grepl("Mix", data.all.task4$breed) | grepl("/", data.all.task4$breed)
+
+# ------------- Candidate code -------------------------
+# Perform bivariate analysis.
+
+
+
+
+
+# Once task is done, delete the task data.
+#rm(data.all.task4)
+
+```
+
+Task 5
+
+```{r}
+# The provided code in this chunk is first run unchanged.
+# Then candidates will change the code at bottom as indicated.
+
+# Set the data so that all candidates start with the same dataframe.
+data.all.task5 <- data.all.original
+
+# The two lines below collect the numeric variables used in PCA,
+# converting some from factors for this purpose.
+shelter.pca <- data.all.task5[, c(5:7, 11,12)]
+shelter.pca[2:5] <- lapply(shelter.pca[2:5], as.numeric)
+
+# Calculate PCA using your assistant's code
+s.pca <- prcomp(shelter.pca, center = TRUE, scale. = FALSE)
+summary(s.pca)
+
+# ------------- Candidate code -------------------------
+# Below is a copy of your assistant's PCA code. 
+# Modify it to complete the task.
+# Copy the modified code to your answer form.
+shelter.pca <- data.all.task5[, c(5:7, 11,12)]
+shelter.pca[2:5] <- lapply(shelter.pca[2:5], as.numeric)
+s.pca <- prcomp(shelter.pca, center = TRUE, scale. = FALSE)
+summary(s.pca)
+
+# Once task is done, delete the task data.
+#rm(data.all.task5)
+
+```
+
+Task 6
+
+```{r}
+# No code.
+```
+
+Task 7
+
+```{r}
+# No code.
+```
+
+Task 8
+
+```{r}
+# No code.
+```
+
+Task 9
+
+```{r}
+# The provided code is run unchanged except for the following change.
+# Candidates will change the provided code that defines glm_drop.
+# The adjusted code will be copied into the submitted Word document as
+# part of your answer.
+
+# Set the data so that all candidates start with the same dataframe.
+data.all.task9 <- data.all.original
+
+# Create adoption variable.
+data.all.task9$adoption <-
+  as.factor(ifelse(data.all.task9$outcome == "Adoption", "Adoption", "Not Adoption"))
+
+# This resets the base level because glm assumes it is the negative response.
+data.all.task9$adoption <- relevel(data.all.task9$adoption, ref = "Not Adoption")
+
+# Split the data into Train & Test portions.
+set.seed(370)
+train_rows <- createDataPartition(1:nrow(data.all.task9), p = 0.8, list = FALSE)
+df_train <- data.all.task9[train_rows,]
+df_test  <- data.all.task9[-train_rows,]
+
+# Your assistant creates glm_start.
+glm_start <- glm(
+  formula = adoption ~ animal + mf + age + in.reason + in.intact + in.month,
+  data = df_train,
+  family = binomial(link = "logit")
+)
+
+# This summarizes the starting model your assistant made.
+summary(glm_start)
+
+# Consider the results of the drop1 function.
+drop1(glm_start)
+
+# The code that follows is copied in the section below where 
+# you will modify it.
+glm_drop <- glm(
+  formula = adoption ~ animal + mf + age + in.reason + in.intact + in.month,
+  data = df_train,
+  family = binomial(link = "logit")
+)
+
+# ---------- Candidate Code _______________________________
+# After considering the above results, adjust the following code
+# that defines glm_drop.
+# Copy the adjusted code into the Word document you submit.
+glm_drop <- glm(
+  formula = adoption ~ animal + mf + age + in.reason + in.intact + in.month,
+  data = df_train,
+  family = binomial(link = "logit")
+)
+
+# The line below does not need to be copied to your answer sheet.
+ summary(glm_drop)
+ 
+#-------- End of Candidate's code -----------------------
+# Candidates are not expected to change the code below.
+
+# Your assistant creates glm_lasso.
+
+# Set up the formula (model form).
+formula.lm <- as.formula("adoption ~ animal + mf + age + in.month + in.reason + in.intact")
+X <- model.matrix(formula.lm, data = df_train)
+glm_lasso <- glmnet(X,
+                    y = df_train$adoption,
+                    family = "binomial",
+                    alpha = 1,
+                    lambda = 0.1)
+
+# Look at the LASSO coefficients.
+coef(glm_lasso)
+
+# Calculate AUCs for the two models: glm_drop and glm_lasso.
+# AUCs are calculated for both train and test portions of the data.
+
+glm_drop_train <- predict(glm_drop, df_train, type = "response")
+auc(df_train$adoption, glm_drop_train)
+
+glm_drop_test <- predict(glm_drop, df_test, type = "response")
+auc(df_test$adoption, glm_drop_test)
+
+X_train <- model.matrix(formula.lm, data = df_train)
+glm_lasso_train <- predict(glm_lasso, newx = X_train ,s = 0.1, type = "response")
+auc(df_train$adoption, c(glm_lasso_train))
+
+X_test <- model.matrix(formula.lm, data = df_test)
+glm_lasso_test <- predict(glm_lasso, newx = X_test ,s = 0.1, type = "response")
+auc(df_test$adoption, c(glm_lasso_test))
+
+# Once task is done, delete the task data.
+#rm(data.all.task9)
+
+```
+
+Task 10
+
+```{r}
+# The provided code is run unchanged except for the code that 
+# creates glm_pandemic.
+# Adjust that code as directed below.
+# The adjusted code will be copied into the submitted Word document as
+# part of your answer.
+
+# Set the data so that all candidates start with the same dataframe.
+data.all.task10 <- data.all.original
+
+# Create pandemic variable.
+data.all.task10$in.year <- as.numeric(as.character(data.all.task10$in.year))
+data.all.task10$pandemic <- ifelse(data.all.task10$in.year >= 2020, "P", "N")
+data.all.task10$pandemic <- ifelse((data.all.task10$in.year == 2020 & data.all.task10$in.month == "1"), "N", data.all.task10$pandemic)
+data.all.task10$pandemic <- ifelse((data.all.task10$in.year == 2020 & data.all.task10$in.month == "2"), "N", data.all.task10$pandemic)
+data.all.task10$pandemic <- as.factor(data.all.task10$pandemic)
+
+# This makes "N" (Normal) the base level
+data.all.task10$pandemic <- relevel(data.all.task10$pandemic, ref = "N")
+
+# ------------ Candidate code ---------------------------
+# In the code below, first uncomment six lines.
+# Then replace FFFFF with the formula you want.
+# Replace DDDDD with the distribution you choose.
+# Replace LLLLL with the link you choose.
+
+# glm_pandemic <- glm(
+#  formula = FFFFF,
+#  data = data.all.task10,
+#  family = DDDDD(link = "LLLLL")
+# )
+
+#summary(glm_pandemic)
+
+
+# Once task is done, delete the task data.
+#rm(data.all.task10)
+
+```
+
